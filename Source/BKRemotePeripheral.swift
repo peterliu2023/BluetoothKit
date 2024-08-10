@@ -42,6 +42,11 @@ public protocol BKRemotePeripheralDelegate: AnyObject {
      - parameter remotePeripheral: The remote peripheral that is ready.
      */
     func remotePeripheralIsReady(_ remotePeripheral: BKRemotePeripheral)
+    
+    
+    func remotePeripheralServiceIsFound(_ remotePeripheral: BKRemotePeripheral, byUUID uuid: CBUUID)
+    
+    func remotePeripheralOnData(_ remotePeripheral: BKRemotePeripheral, withData data: Data?)
 
 }
 
@@ -129,7 +134,7 @@ public class BKRemotePeripheral: BKRemotePeer, BKCBPeripheralDelegate {
             peripheral(peripheral!, didDiscoverServices: nil)
             return
         }
-        peripheral?.discoverServices(configuration!.serviceUUIDs)
+        peripheral?.discoverServices(configuration!.realServiceUUIDs)
     }
 
     internal func unsubscribe() {
@@ -160,13 +165,14 @@ public class BKRemotePeripheral: BKRemotePeer, BKCBPeripheralDelegate {
             if service.characteristics != nil {
                 self.peripheral(peripheral, didDiscoverCharacteristicsFor: service, error: nil)
             } else {
+                peripheralDelegate?.remotePeripheralServiceIsFound(self, byUUID: service.uuid)
                 peripheral.discoverCharacteristics(configuration!.characteristicUUIDsForServiceUUID(service.uuid), for: service)
             }
         }
     }
 
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard service.uuid == configuration!.dataServiceUUID, let dataCharacteristic = service.characteristics?.filter({ $0.uuid == configuration!.dataServiceCharacteristicUUID }).last else {
+        guard service.uuid == configuration!.realDataServiceUUID, let dataCharacteristic = service.characteristics?.filter({ $0.uuid == configuration!.dataServiceCharacteristicUUID }).last else {
             return
         }
         characteristicData = dataCharacteristic
@@ -179,6 +185,7 @@ public class BKRemotePeripheral: BKRemotePeer, BKCBPeripheralDelegate {
             return
         }
         handleReceivedData(characteristic.value!)
+        peripheralDelegate?.remotePeripheralOnData(self, withData: characteristic.value)
     }
 
 }

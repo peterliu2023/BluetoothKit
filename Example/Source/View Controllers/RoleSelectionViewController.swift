@@ -33,11 +33,31 @@ internal class RoleSelectionViewController: UIViewController {
     private let buttonColor = Colors.darkBlue
     private let centralButton = UIButton(type: UIButton.ButtonType.custom)
     private let peripheralButton = UIButton(type: UIButton.ButtonType.custom)
+    // 存储单选按钮
+    var radioButtons: [UIButton] = []
 
     // MARK: UIViewController Life Cycle
 
     internal override func viewDidLoad() {
+
+        // 获取resources文件夹中的txt文件数量
+        let txtFiles = getTxtFiles()
+        // 动态创建单选按钮
+        for (index, file) in txtFiles.enumerated() {
+            let radioButton = UIButton(type: .custom)
+            configureRadioButton(radioButton, title: file)
+            radioButton.tag = index
+            radioButtons.append(radioButton)
+            view.addSubview(radioButton)
+        }
+        // 设置单选按钮的布局
+//        applyRadioButtonsConstraints()
+        if radioButtons.count > 0 {
+            radioButtons[0].isSelected = true
+        }
+
         navigationItem.title = "Select Role"
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.red]
         view.backgroundColor = UIColor.white
         centralButton.setTitle("Central", for: UIControl.State())
         peripheralButton.setTitle("Peripheral", for: UIControl.State())
@@ -46,6 +66,37 @@ internal class RoleSelectionViewController: UIViewController {
         #if os(tvOS)
         peripheralButton.isEnabled = false
         #endif
+    }
+    
+    private func configureRadioButton(_ button: UIButton, title: String) {
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.setImage(UIImage(systemName: "circle"), for: .normal)
+        button.setImage(UIImage(systemName: "circle.fill"), for: .selected)
+        button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func getTxtFiles() -> [String] {
+        let fileManager = FileManager.default
+        let resourcePath = Bundle.main.resourcePath ?? ""
+        do {
+            let files = try fileManager.contentsOfDirectory(atPath: resourcePath)
+            return files.filter { $0.hasSuffix(".txt") }
+        } catch {
+            print("Error reading contents of resource directory: \(error)")
+            return []
+        }
+    }
+    
+    @objc private func radioButtonTapped(_ sender: UIButton) {
+        // 取消所有单选按钮的选中状态
+        for button in radioButtons {
+            button.isSelected = false
+        }
+        
+        // 设置当前点击的按钮为选中状态
+        sender.isSelected = true
     }
 
     // MARK: Functions
@@ -59,23 +110,53 @@ internal class RoleSelectionViewController: UIViewController {
             #elseif os(tvOS)
             button.addTarget(self, action: #selector(RoleSelectionViewController.buttonTapped(_:)), for: UIControl.Event.primaryActionTriggered)
             #endif
+            button.translatesAutoresizingMaskIntoConstraints = false
 
             view.addSubview(button)
         }
     }
 
     private func applyConstraints() {
-        centralButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(offset)
-            make.leading.equalTo(view).offset(offset)
-            make.trailing.equalTo(view).offset(-offset)
-            make.height.equalTo(peripheralButton)
+//        centralButton.snp.makeConstraints { make in
+//            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(offset)
+//            make.leading.equalTo(view).offset(offset)
+//            make.trailing.equalTo(view).offset(-offset)
+//            make.height.equalTo(peripheralButton)
+//        }
+//        peripheralButton.snp.makeConstraints { make in
+//            if radioButtons.count == 0 {
+//                make.top.equalTo(centralButton.snp.bottom).offset(offset)
+//            } else {
+//                make.top.equalTo(radioButtons[radioButtons.count - 1].snp.bottom).offset(offset)
+//            }
+//            make.leading.trailing.equalTo(centralButton)
+//            make.bottom.equalTo(view).offset(-offset)
+//        }
+        var constrains = [
+            centralButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            centralButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: offset),
+            centralButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: offset),
+            centralButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -offset),
+            centralButton.heightAnchor.constraint(equalTo: peripheralButton.heightAnchor)
+        ]
+        
+        for (index, button) in radioButtons.enumerated() {
+            constrains.append(
+                button.centerXAnchor.constraint(equalTo: view.centerXAnchor))
+            constrains.append(
+                button.topAnchor.constraint(equalTo: index == 0 ? centralButton.bottomAnchor : radioButtons[index - 1].bottomAnchor, constant: 20))
         }
-        peripheralButton.snp.makeConstraints { make in
-            make.top.equalTo(centralButton.snp.bottom).offset(offset)
-            make.leading.trailing.equalTo(centralButton)
-            make.bottom.equalTo(view).offset(-offset)
+        if radioButtons.count == 0 {
+            constrains.append(peripheralButton.topAnchor.constraint(equalTo: centralButton.bottomAnchor, constant: offset))
+        } else {
+            constrains.append(peripheralButton.topAnchor.constraint(equalTo: radioButtons[radioButtons.count - 1].bottomAnchor, constant: offset))
         }
+        constrains.append(peripheralButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: offset))
+        constrains.append(peripheralButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -offset))
+        constrains.append(peripheralButton.centerXAnchor.constraint(equalTo: view.centerXAnchor))
+        constrains.append(peripheralButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -offset))
+        
+        NSLayoutConstraint.activate(constrains)
     }
 
     // MARK: Target Actions
@@ -84,9 +165,21 @@ internal class RoleSelectionViewController: UIViewController {
         if button == centralButton {
             navigationController?.pushViewController(CentralViewController(), animated: true)
         } else if button == peripheralButton {
-            #if os(iOS)
-                navigationController?.pushViewController(PeripheralViewController(), animated: true)
-            #endif
+#if os(iOS)
+            // 创建 PeripheralViewController 实例
+            let peripheralVC = PeripheralViewController()
+            var title: String?
+            for button in radioButtons {
+                if button.isSelected {
+                    title = button.titleLabel?.text
+                    break
+                }
+            }
+            
+            // 将选中的 radioButton 的标题传递给 PeripheralViewController
+            peripheralVC.selectedRadioButtonTitle = title
+            navigationController?.pushViewController(peripheralVC, animated: true)
+#endif
         }
     }
 

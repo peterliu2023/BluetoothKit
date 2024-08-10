@@ -79,6 +79,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		64203D8B2C48C28100102102 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
 		91A105A026B1A6F700CB3209 /* BKCBCentralManagerDelegateProxy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BKCBCentralManagerDelegateProxy.swift; sourceTree = "<group>"; };
 		91A105A126B1A6F700CB3209 /* BKDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BKDiscovery.swift; sourceTree = "<group>"; };
 		91A105A226B1A6F700CB3209 /* BKPeripheralStateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BKPeripheralStateMachine.swift; sourceTree = "<group>"; };
@@ -133,6 +134,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		64203D8A2C48C28100102102 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				64203D8B2C48C28100102102 /* Accelerate.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		91A1059F26B1A6F700CB3209 /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -169,6 +178,7 @@
 				91A1059F26B1A6F700CB3209 /* Source */,
 				C687E3A31B8B4A2800B702D8 /* Resources */,
 				C687E3991B8B496400B702D8 /* Products */,
+				64203D8A2C48C28100102102 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -300,6 +310,7 @@
 					};
 					C687E3971B8B496400B702D8 = {
 						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 93NYH2YQEL;
 						LastSwiftMigration = 0800;
 					};
 					C6ED86C01BA955A600C9B70B = {
@@ -634,13 +645,16 @@
 		C687E3A11B8B496400B702D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 93NYH2YQEL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
 				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rasmusth.BluetoothKit;
 				SKIP_INSTALL = YES;
@@ -651,13 +665,16 @@
 		C687E3A21B8B496400B702D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 93NYH2YQEL;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
 				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rasmusth.BluetoothKit;
 				SKIP_INSTALL = YES;

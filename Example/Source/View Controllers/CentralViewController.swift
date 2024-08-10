@@ -87,8 +87,8 @@ internal class CentralViewController: UIViewController, UITableViewDataSource, U
         do {
             central.delegate = self
             central.addAvailabilityObserver(self)
-            let dataServiceUUID = UUID(uuidString: "6E6B5C64-FAF7-40AE-9C21-D4933AF45B23")!
-            let dataServiceCharacteristicUUID = UUID(uuidString: "477A2967-1FAB-4DC5-920A-DEE5DE685A3D")!
+            let dataServiceUUID = UUID(uuidString: "000000FF-0000-1000-8000-00805F9B34FB")!
+            let dataServiceCharacteristicUUID = UUID(uuidString: "0000FFE1-0000-1000-8000-00805F9B34FB")!
             let configuration = BKConfiguration(dataServiceUUID: dataServiceUUID, dataServiceCharacteristicUUID: dataServiceCharacteristicUUID)
             try central.startWithConfiguration(configuration)
         } catch let error {
@@ -98,14 +98,21 @@ internal class CentralViewController: UIViewController, UITableViewDataSource, U
 
     private func scan() {
         central.scanContinuouslyWithChangeHandler({ changes, discoveries in
+//            print("----------")
+//            print(changes)
+//            print("**********")
+//            print(discoveries)
+//            print("==========")
             let indexPathsToRemove = changes.filter({ $0 == .remove(discovery: nil) }).map({ IndexPath(row: self.discoveries.firstIndex(of: $0.discovery)!, section: 0) })
             self.discoveries = discoveries
             let indexPathsToInsert = changes.filter({ $0 == .insert(discovery: nil) }).map({ IndexPath(row: self.discoveries.firstIndex(of: $0.discovery)!, section: 0) })
             if !indexPathsToRemove.isEmpty {
-                self.discoveriesTableView.deleteRows(at: indexPathsToRemove, with: UITableView.RowAnimation.automatic)
+                self.discoveriesTableView.reloadData()
+//                self.discoveriesTableView.deleteRows(at: indexPathsToRemove, with: UITableView.RowAnimation.automatic)
             }
             if !indexPathsToInsert.isEmpty {
-                self.discoveriesTableView.insertRows(at: indexPathsToInsert, with: UITableView.RowAnimation.automatic)
+                self.discoveriesTableView.reloadData()
+//                self.discoveriesTableView.insertRows(at: indexPathsToInsert, with: UITableView.RowAnimation.automatic)
             }
             for insertedDiscovery in changes.filter({ $0 == .insert(discovery: nil) }) {
                 Logger.log("Discovery: \(insertedDiscovery)")
@@ -134,6 +141,17 @@ internal class CentralViewController: UIViewController, UITableViewDataSource, U
         let cell = tableView.dequeueReusableCell(withIdentifier: discoveriesTableViewCellIdentifier, for: indexPath)
         let discovery = discoveries[indexPath.row]
         cell.textLabel?.text = discovery.localName != nil ? discovery.localName : discovery.remotePeripheral.name
+        print("adversementdata:")
+        print(discovery.advertisementData)
+        print("remotePeripheral")
+        print(discovery.remotePeripheral)
+        print("rssi:")
+        print(discovery.RSSI)
+
+        var text:String = cell.textLabel?.text ?? ""
+        if text.isEmpty {
+            cell.textLabel?.text = "No name"
+        }
         return cell
     }
 

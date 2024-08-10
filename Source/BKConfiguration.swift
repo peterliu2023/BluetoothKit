@@ -34,6 +34,8 @@ public class BKConfiguration {
 
     /// The UUID for the service used to send data. This should be unique to your applications.
     public let dataServiceUUID: CBUUID
+    
+    public let realDataServiceUUID: CBUUID
 
     /// The UUID for the characteristic used to send data. This should be unique to your application.
     public var dataServiceCharacteristicUUID: CBUUID
@@ -48,12 +50,18 @@ public class BKConfiguration {
         let serviceUUIDs = [ dataServiceUUID ]
         return serviceUUIDs
     }
+    
+    internal var realServiceUUIDs: [CBUUID] {
+        let serviceUUIDs = [ realDataServiceUUID ]
+        return serviceUUIDs
+    }
 
     // MARK: Initialization
 
-    public init(dataServiceUUID: UUID, dataServiceCharacteristicUUID: UUID) {
+    public init(dataServiceUUID: UUID, dataServiceCharacteristicUUID: UUID, realDataServiceUUID: UUID? = nil) {
         self.dataServiceUUID = CBUUID(nsuuid: dataServiceUUID)
         self.dataServiceCharacteristicUUID = CBUUID(nsuuid: dataServiceCharacteristicUUID)
+        self.realDataServiceUUID = realDataServiceUUID==nil ? self.dataServiceUUID: CBUUID(nsuuid: realDataServiceUUID!)
         endOfDataMark = "EOD".data(using: String.Encoding.utf8)!
         dataCancelledMark = "COD".data(using: String.Encoding.utf8)!
     }
